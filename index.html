@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAT Brasil — Plataforma de Estudos</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Epilogue:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --black:#0A0A0A; --white:#FAFAF8; --gray-50:#F5F5F3;
+  --gray-100:#EBEBEA; --gray-200:#D4D4D2; --gray-400:#9B9B99;
+  --gray-600:#5C5C5A; --gold:#B8922A; --gold-light:#F5E9C8;
+  --green:#2D6A4F; --green-light:#D8EDDF; --red:#C0392B; --red-light:#FDECEA;
+}
+body { font-family:'Epilogue',sans-serif; background:var(--white); color:var(--black); min-height:100vh; display:flex; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width:220px; min-height:100vh; position:fixed; top:0; left:0; bottom:0;
+  display:flex; flex-direction:column; border-right:1px solid var(--gray-100);
+  background:var(--white); z-index:50;
+}
+.logo-wrap { padding:36px 28px 28px; border-bottom:1px solid var(--gray-100); }
+.logo { font-family:'Playfair Display',serif; font-size:22px; font-weight:400; letter-spacing:-0.3px; }
+.logo em { font-style:italic; color:var(--gold); }
+.logo-tagline { margin-top:4px; font-size:10px; letter-spacing:2.5px; text-transform:uppercase; color:var(--gray-400); }
+.nav { flex:1; padding:20px 0; }
+.nav-section { font-size:9.5px; letter-spacing:2px; text-transform:uppercase; color:var(--gray-400); padding:16px 28px 6px; font-weight:500; }
+.nav-link {
+  display:flex; align-items:center; gap:10px; padding:9px 28px;
+  font-size:13px; color:var(--gray-600); cursor:pointer; text-decoration:none;
+  transition:color 0.15s; border-left:2px solid transparent;
+}
+.nav-link:hover { color:var(--black); }
+.nav-link.active { color:var(--black); border-left-color:var(--black); font-weight:500; }
+.nav-link svg { width:15px; height:15px; flex-shrink:0; opacity:0.6; }
+.nav-link.active svg { opacity:1; }
+.nav-pill { margin-left:auto; background:var(--black); color:var(--white); font-size:9.5px; font-weight:600; padding:2px 6px; border-radius:4px; }
+.sidebar-bottom { padding:20px 28px; border-top:1px solid var(--gray-100); }
+.user-row { display:flex; align-items:center; gap:10px; }
+.avatar { width:32px; height:32px; border-radius:50%; background:var(--black); color:var(--white); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; flex-shrink:0; }
+.user-name { font-size:12.5px; font-weight:500; }
+.user-plan { font-size:11px; color:var(--gray-400); }
+
+/* ── PÁGINAS ── */
+.page { display:none; margin-left:220px; flex:1; min-height:100vh; }
+.page.active { display:block; }
+
+/* ── DASHBOARD ── */
+.main { padding:48px 56px; max-width:1100px; }
+.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:48px; animation:fadeUp 0.5s ease both; }
+.greeting { font-family:'Playfair Display',serif; font-size:36px; font-weight:400; line-height:1.1; }
+.greeting em { font-style:italic; }
+.subgreeting { margin-top:6px; font-size:13px; color:var(--gray-400); font-weight:300; }
+.header-actions { display:flex; gap:10px; align-items:center; margin-top:4px; }
+.streak { display:flex; align-items:center; gap:6px; border:1px solid var(--gray-200); border-radius:6px; padding:7px 14px; font-size:12.5px; color:var(--gray-600); }
+.streak-num { font-weight:600; color:var(--black); }
+.btn-main { background:var(--black); color:var(--white); border:none; border-radius:6px; padding:9px 20px; font-family:'Epilogue',sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:opacity 0.15s; }
+.btn-main:hover { opacity:0.82; }
+
+.score-strip { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--gray-100); border:1px solid var(--gray-100); border-radius:12px; overflow:hidden; margin-bottom:40px; animation:fadeUp 0.5s 0.08s ease both; }
+.score-cell { background:var(--white); padding:24px 28px; transition:background 0.15s; }
+.score-cell:hover { background:var(--gray-50); }
+.sc-label { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--gray-400); font-weight:500; margin-bottom:8px; }
+.sc-value { font-family:'Playfair Display',serif; font-size:38px; font-weight:400; line-height:1; }
+.sc-value.gold { color:var(--gold); }
+.sc-delta { margin-top:4px; font-size:11.5px; color:var(--green); }
+.sc-delta.neutral { color:var(--gray-400); }
+
+.two-col { display:grid; grid-template-columns:1fr 380px; gap:24px; margin-bottom:40px; animation:fadeUp 0.5s 0.16s ease both; }
+.card { border:1px solid var(--gray-100); border-radius:12px; padding:28px; }
+.card-title { font-size:10.5px; letter-spacing:2px; text-transform:uppercase; color:var(--gray-400); font-weight:500; margin-bottom:24px; }
+.subj-row { margin-bottom:14px; }
+.subj-row:last-child { margin-bottom:0; }
+.subj-top { display:flex; justify-content:space-between; margin-bottom:6px; }
+.subj-name { font-size:12.5px; }
+.subj-pct { font-size:12.5px; color:var(--gray-400); font-weight:500; }
+.bar-track { height:3px; background:var(--gray-100); border-radius:99px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:99px; background:var(--black); transition:width 0.8s cubic-bezier(0.16,1,0.3,1); }
+.bar-fill.mid { background:var(--gray-400); }
+.bar-fill.low { background:var(--gray-200); }
+
+.leaderboard { border:1px solid var(--gray-100); border-radius:12px; overflow:hidden; }
+.lb-header { padding:20px 24px 16px; border-bottom:1px solid var(--gray-100); display:flex; align-items:center; justify-content:space-between; }
+.lb-title { font-size:10.5px; letter-spacing:2px; text-transform:uppercase; color:var(--gray-400); font-weight:500; }
+.lb-tabs { display:flex; gap:2px; background:var(--gray-50); border-radius:6px; padding:3px; }
+.lb-tab { font-size:11px; font-weight:500; color:var(--gray-400); padding:4px 10px; border-radius:4px; cursor:pointer; border:none; background:none; font-family:'Epilogue',sans-serif; transition:all 0.15s; }
+.lb-tab.active { background:var(--white); color:var(--black); box-shadow:0 1px 3px rgba(0,0,0,0.08); }
+.lb-row { display:flex; align-items:center; gap:14px; padding:13px 24px; border-bottom:1px solid var(--gray-100); transition:background 0.12s; cursor:pointer; }
+.lb-row:last-child { border-bottom:none; }
+.lb-row:hover { background:var(--gray-50); }
+.lb-row.me { background:var(--gold-light); }
+.lb-rank { width:22px; font-size:13px; font-weight:600; color:var(--gray-400); text-align:center; flex-shrink:0; font-family:'Playfair Display',serif; }
+.lb-rank.top1 { color:var(--gold); }
+.lb-rank.top2 { color:var(--gray-600); }
+.lb-rank.top3 { color:#A0522D; }
+.lb-avatar { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; flex-shrink:0; }
+.lb-info { flex:1; min-width:0; }
+.lb-name { font-size:13px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.lb-city { font-size:11px; color:var(--gray-400); margin-top:1px; }
+.lb-score-wrap { text-align:right; }
+.lb-score { font-family:'Playfair Display',serif; font-size:18px; }
+.lb-score.gold { color:var(--gold); }
+.lb-change { font-size:10.5px; font-weight:500; margin-top:1px; }
+.lb-change.up { color:var(--green); }
+.lb-change.down { color:var(--red); }
+.lb-change.same { color:var(--gray-400); }
+
+.section-heading { font-size:9.5px; letter-spacing:2.5px; text-transform:uppercase; color:var(--gray-400); font-weight:500; margin-bottom:16px; }
+.bottom-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:40px; animation:fadeUp 0.5s 0.24s ease both; }
+.module-card { border:1px solid var(--gray-100); border-radius:12px; padding:24px; cursor:pointer; transition:all 0.2s; position:relative; overflow:hidden; }
+.module-card:hover { border-color:var(--black); }
+.module-card::after { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--black); transform:scaleX(0); transform-origin:left; transition:transform 0.2s; }
+.module-card:hover::after { transform:scaleX(1); }
+.mc-label { font-size:9.5px; letter-spacing:2.5px; text-transform:uppercase; color:var(--gray-400); font-weight:500; margin-bottom:10px; }
+.mc-title { font-family:'Playfair Display',serif; font-size:20px; font-weight:400; margin-bottom:8px; line-height:1.2; }
+.mc-desc { font-size:12px; color:var(--gray-400); line-height:1.55; margin-bottom:16px; }
+.mc-meta { display:flex; justify-content:space-between; align-items:center; }
+.mc-diff { font-size:10.5px; padding:3px 8px; border-radius:4px; font-weight:500; }
+.mc-diff.easy { background:var(--green-light); color:var(--green); }
+.mc-diff.med { background:var(--gold-light); color:var(--gold); }
+.mc-diff.hard { background:var(--red-light); color:var(--red); }
+.mc-count { font-size:11px; color:var(--gray-400); }
+
+.quest-bar { display:flex; align-items:center; gap:20px; border:1px solid var(--gray-200); border-radius:10px; padding:20px 28px; margin-bottom:28px; background:var(--gray-50); animation:fadeUp 0.5s 0.2s ease both; }
+.quest-left { flex:1; }
+.quest-label { font-size:9.5px; letter-spacing:2.5px; text-transform:uppercase; color:var(--gold); font-weight:600; margin-bottom:4px; }
+.quest-title { font-size:14px; font-weight:500; }
+.quest-desc { font-size:12px; color:var(--gray-400); margin-top:2px; }
+.quest-prog { display:flex; align-items:baseline; gap:3px; }
+.quest-n { font-family:'Playfair Display',serif; font-size:28px; }
+.quest-of { font-size:12px; color:var(--gray-400); }
+.btn-quest { background:var(--gold); color:var(--white); border:none; border-radius:6px; padding:9px 20px; font-family:'Epilogue',sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:opacity 0.15s; }
+.btn-quest:hover { opacity:0.85; }
+
+.tips-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; animation:fadeUp 0.5s 0.32s ease both; }
+.tip { border:1px solid var(--gray-100); border-radius:10px; padding:20px 22px; display:flex; gap:16px; }
+.tip-num { font-family:'Playfair Display',serif; font-size:28px; color:var(--gray-200); line-height:1; flex-shrink:0; margin-top:-2px; }
+.tip-title { font-size:13px; font-weight:500; margin-bottom:4px; }
+.tip-body { font-size:12px; color:var(--gray-400); line-height:1.55; }
+
+/* ── PÁGINA DE QUESTÕES ── */
+.q-topbar { display:flex; align-items:center; justify-content:space-between; padding:20px 48px; border-bottom:1px solid var(--gray-100); position:sticky; top:0; background:var(--white); z-index:10; }
+.filters { display:flex; gap:8px; flex-wrap:wrap; }
+.filter-btn { font-family:'Epilogue',sans-serif; font-size:12px; font-weight:500; padding:6px 14px; border-radius:6px; border:1px solid var(--gray-200); background:none; color:var(--gray-600); cursor:pointer; transition:all 0.15s; }
+.filter-btn:hover { border-color:var(--black); color:var(--black); }
+.filter-btn.active { background:var(--black); color:var(--white); border-color:var(--black); }
+.stats-bar { display:flex; gap:24px; }
+.stat { text-align:center; }
+.stat-n { font-family:'Playfair Display',serif; font-size:22px; }
+.stat-n.gold { color:var(--gold); }
+.stat-l { font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gray-400); margin-top:1px; }
+
+.q-layout { display:grid; grid-template-columns:1fr 340px; min-height:calc(100vh - 73px); }
+.q-panel { padding:40px 48px; border-right:1px solid var(--gray-100); }
+.q-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; }
+.q-counter { font-size:12px; color:var(--gray-400); }
+.q-nav-btns { display:flex; gap:8px; }
+.nav-btn { width:34px; height:34px; border-radius:6px; border:1px solid var(--gray-100); background:none; font-size:16px; cursor:pointer; color:var(--gray-400); display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
+.nav-btn:hover { border-color:var(--black); color:var(--black); }
+.nav-btn:disabled { opacity:0.3; cursor:not-allowed; }
+
+.q-tags { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+.tag { font-size:10.5px; font-weight:500; padding:3px 10px; border-radius:4px; }
+.tag.area-mat { background:#EAF3DE; color:#2D6A4F; }
+.tag.area-leit { background:#E6F1FB; color:#185FA5; }
+.tag.area-escr { background:#FAEEDA; color:#854F0B; }
+.tag.dif-facil { background:var(--green-light); color:var(--green); }
+.tag.dif-medio { background:var(--gold-light); color:var(--gold); }
+.tag.dif-dificil { background:var(--red-light); color:var(--red); }
+
+.q-text { font-size:16px; line-height:1.75; margin-bottom:32px; white-space:pre-line; }
+.opts { display:flex; flex-direction:column; gap:10px; margin-bottom:24px; }
+.opt { display:flex; align-items:flex-start; gap:14px; border:1px solid var(--gray-100); border-radius:8px; padding:14px 18px; background:none; font-family:'Epilogue',sans-serif; font-size:14px; color:var(--gray-600); cursor:pointer; text-align:left; transition:all 0.15s; width:100%; }
+.opt:hover { border-color:var(--gray-200); color:var(--black); }
+.opt.selected { border-color:var(--black); color:var(--black); }
+.opt.correct { border-color:var(--green); color:var(--green); background:var(--green-light); }
+.opt.wrong { border-color:var(--red); color:var(--red); background:var(--red-light); }
+.opt-letter { width:22px; height:22px; border-radius:4px; border:1px solid var(--gray-200); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; flex-shrink:0; margin-top:2px; font-family:'Playfair Display',serif; }
+.q-foot { display:flex; justify-content:space-between; align-items:center; }
+.q-hint { font-size:12px; color:var(--gray-400); }
+.q-hint.correct { color:var(--green); font-weight:500; }
+.q-hint.wrong { color:var(--red); font-weight:500; }
+.btn-verify { background:var(--black); color:var(--white); border:none; border-radius:6px; padding:10px 24px; font-family:'Epilogue',sans-serif; font-size:13.5px; font-weight:500; cursor:pointer; transition:opacity 0.15s; }
+.btn-verify:hover { opacity:0.8; }
+.btn-verify:disabled { opacity:0.3; cursor:not-allowed; }
+.explain { margin-top:24px; border-left:2px solid var(--black); padding:16px 18px; background:var(--gray-50); font-size:13.5px; color:var(--gray-600); line-height:1.65; border-radius:0 8px 8px 0; display:none; }
+.explain.show { display:block; }
+.explain strong { color:var(--black); }
+
+.side-panel { padding:32px 28px; }
+.side-title { font-size:10px; letter-spacing:2.5px; text-transform:uppercase; color:var(--gray-400); font-weight:500; margin-bottom:20px; }
+.progress-ring-wrap { display:flex; align-items:center; gap:20px; margin-bottom:28px; }
+.ring-main { font-family:'Playfair Display',serif; font-size:32px; }
+.ring-sub { font-size:12px; color:var(--gray-400); margin-top:2px; }
+.q-list { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:28px; }
+.q-dot { width:32px; height:32px; border-radius:6px; border:1px solid var(--gray-200); display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:500; color:var(--gray-400); cursor:pointer; transition:all 0.12s; }
+.q-dot:hover { border-color:var(--black); color:var(--black); }
+.q-dot.current { border-color:var(--black); background:var(--black); color:var(--white); }
+.q-dot.acerto { border-color:var(--green); background:var(--green-light); color:var(--green); }
+.q-dot.erro { border-color:var(--red); background:var(--red-light); color:var(--red); }
+.area-row { margin-bottom:12px; }
+.area-top { display:flex; justify-content:space-between; margin-bottom:5px; }
+.area-name { font-size:12.5px; }
+.area-pct { font-size:12px; color:var(--gray-400); font-weight:500; }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo-wrap">
+    <div class="logo">SAT <em>Brasil</em></div>
+    <div class="logo-tagline">Plataforma de estudos</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-link active" id="nav-dashboard" onclick="goTo('dashboard',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Painel
+    </a>
+    <a class="nav-link" id="nav-questoes" onclick="goTo('questoes',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M9 9a3 3 0 0 1 6 0c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>
+      Questões
+      <span class="nav-pill">20</span>
+    </a>
+    <a class="nav-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Simulados
+    </a>
+    <a class="nav-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      Flashcards
+    </a>
+    <div class="nav-section">Ranking</div>
+    <a class="nav-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+      Placar Geral
+    </a>
+    <div class="nav-section">Conta</div>
+    <a class="nav-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Perfil
+    </a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="user-row">
+      <div class="avatar">JB</div>
+      <div>
+        <div class="user-name">João Brasileiro</div>
+        <div class="user-plan">Plano gratuito</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ── PÁGINA: DASHBOARD ── -->
+<div class="page active" id="page-dashboard">
+<div class="main">
+  <div class="page-header">
+    <div>
+      <div class="greeting">Boa tarde, <em>João.</em></div>
+      <div class="subgreeting">Continue — você está no top 12% da plataforma.</div>
+    </div>
+    <div class="header-actions">
+      <div class="streak"><span class="streak-num">7</span>&nbsp;dias seguidos 🔥</div>
+      <button class="btn-main" onclick="goTo('questoes',document.getElementById('nav-questoes'))">Praticar agora →</button>
+    </div>
+  </div>
+
+  <div class="score-strip">
+    <div class="score-cell"><div class="sc-label">Pontuação atual</div><div class="sc-value gold">1.280</div><div class="sc-delta">+120 desde o início</div></div>
+    <div class="score-cell"><div class="sc-label">Meta</div><div class="sc-value">1.500</div><div class="sc-delta neutral">faltam 220 pts</div></div>
+    <div class="score-cell"><div class="sc-label">Taxa de acerto</div><div class="sc-value" id="db-taxa">74%</div><div class="sc-delta">+4% este mês</div></div>
+    <div class="score-cell"><div class="sc-label">Questões respondidas</div><div class="sc-value" id="db-respondidas">248</div><div class="sc-delta">+18 esta semana</div></div>
+  </div>
+
+  <div class="quest-bar">
+    <div class="quest-left">
+      <div class="quest-label">Desafio do dia</div>
+      <div class="quest-title">10 questões de Matemática</div>
+      <div class="quest-desc">Ganhe 50 XP e suba no ranking ao completar</div>
+    </div>
+    <div class="quest-prog"><span class="quest-n" id="db-quest-n">6</span><span class="quest-of">/ 10</span></div>
+    <button class="btn-quest" onclick="goTo('questoes',document.getElementById('nav-questoes'))">Continuar →</button>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Desempenho por área</div>
+      <div class="subj-row"><div class="subj-top"><span class="subj-name">Álgebra</span><span class="subj-pct" id="db-alg">—</span></div><div class="bar-track"><div class="bar-fill" id="bar-alg" style="width:0%"></div></div></div>
+      <div class="subj-row"><div class="subj-top"><span class="subj-name">Análise de dados</span><span class="subj-pct" id="db-dados">—</span></div><div class="bar-track"><div class="bar-fill" id="bar-dados" style="width:0%"></div></div></div>
+      <div class="subj-row"><div class="subj-top"><span class="subj-name">Leitura crítica</span><span class="subj-pct" id="db-leit">—</span></div><div class="bar-track"><div class="bar-fill mid" id="bar-leit" style="width:0%"></div></div></div>
+      <div class="subj-row"><div class="subj-top"><span class="subj-name">Geometria</span><span class="subj-pct" id="db-geo">—</span></div><div class="bar-track"><div class="bar-fill mid" id="bar-geo" style="width:0%"></div></div></div>
+      <div class="subj-row"><div class="subj-top"><span class="subj-name">Escrita</span><span class="subj-pct" id="db-escr">—</span></div><div class="bar-track"><div class="bar-fill low" id="bar-escr" style="width:0%"></div></div></div>
+    </div>
+
+    <div class="leaderboard">
+      <div class="lb-header">
+        <div class="lb-title">Ranking</div>
+        <div class="lb-tabs">
+          <button class="lb-tab active" onclick="setTab(this,'semanal')">Semana</button>
+          <button class="lb-tab" onclick="setTab(this,'mensal')">Mês</button>
+          <button class="lb-tab" onclick="setTab(this,'geral')">Geral</button>
+        </div>
+      </div>
+      <div class="lb-list" id="lbList"></div>
+    </div>
+  </div>
+
+  <div class="section-heading">Praticar por módulo</div>
+  <div class="bottom-grid">
+    <div class="module-card" onclick="goTo('questoes',document.getElementById('nav-questoes'),filtrarArea('Matematica'))">
+      <div class="mc-label">Módulo 01</div><div class="mc-title">Matemática</div>
+      <div class="mc-desc">Álgebra, geometria, análise de dados</div>
+      <div class="mc-meta"><span class="mc-diff med">Intermediário</span><span class="mc-count">8 questões</span></div>
+    </div>
+    <div class="module-card" onclick="goTo('questoes',document.getElementById('nav-questoes'),filtrarArea('Leitura'))">
+      <div class="mc-label">Módulo 02</div><div class="mc-title">Leitura Crítica</div>
+      <div class="mc-desc">Compreensão, vocabulário e argumentação</div>
+      <div class="mc-meta"><span class="mc-diff hard">Difícil</span><span class="mc-count">6 questões</span></div>
+    </div>
+    <div class="module-card" onclick="goTo('questoes',document.getElementById('nav-questoes'),filtrarArea('Escrita'))">
+      <div class="mc-label">Módulo 03</div><div class="mc-title">Escrita & Linguagem</div>
+      <div class="mc-desc">Gramática, pontuação e concisão</div>
+      <div class="mc-meta"><span class="mc-diff easy">Iniciante</span><span class="mc-count">6 questões</span></div>
+    </div>
+  </div>
+
+  <div class="section-heading">Dicas para brasileiros</div>
+  <div class="tips-grid">
+    <div class="tip"><div class="tip-num">01</div><div><div class="tip-title">Técnica de eliminação</div><div class="tip-body">No SAT não há penalidade por errar. Elimine 2 opções erradas e aumente muito suas chances.</div></div></div>
+    <div class="tip"><div class="tip-num">02</div><div><div class="tip-title">Gestão de tempo</div><div class="tip-body">Matemática: 1 min por questão. Leitura: não releia o texto todo, vá direto às perguntas.</div></div></div>
+    <div class="tip"><div class="tip-num">03</div><div><div class="tip-title">Plugue números</div><div class="tip-body">Quando houver variáveis nas alternativas, substitua 0, 1 ou 2 para achar a resposta certa.</div></div></div>
+    <div class="tip"><div class="tip-num">04</div><div><div class="tip-title">Vocabulário acadêmico</div><div class="tip-body">Foque em "albeit", "concede", "bolster", "albeit" — palavras formais muito comuns no SAT.</div></div></div>
+  </div>
+</div>
+</div>
+
+<!-- ── PÁGINA: QUESTÕES ── -->
+<div class="page" id="page-questoes">
+  <div class="q-topbar">
+    <div class="filters" id="filters">
+      <button class="filter-btn active" onclick="filtrar(this,'todas')">Todas</button>
+      <button class="filter-btn" onclick="filtrar(this,'Matematica')">Matemática</button>
+      <button class="filter-btn" onclick="filtrar(this,'Leitura')">Leitura</button>
+      <button class="filter-btn" onclick="filtrar(this,'Escrita')">Escrita</button>
+      <button class="filter-btn" onclick="filtrar(this,'facil')">Fácil</button>
+      <button class="filter-btn" onclick="filtrar(this,'medio')">Médio</button>
+      <button class="filter-btn" onclick="filtrar(this,'dificil')">Difícil</button>
+    </div>
+    <div class="stats-bar">
+      <div class="stat"><div class="stat-n gold" id="st-acertos">0</div><div class="stat-l">Acertos</div></div>
+      <div class="stat"><div class="stat-n" id="st-erros">0</div><div class="stat-l">Erros</div></div>
+      <div class="stat"><div class="stat-n" id="st-pct">—</div><div class="stat-l">Taxa</div></div>
+    </div>
+  </div>
+  <div class="q-layout">
+    <div class="q-panel" id="qPanel">
+      <div class="q-nav">
+        <div class="q-counter" id="qCounter">Questão 1 de 20</div>
+        <div class="q-nav-btns">
+          <button class="nav-btn" id="btnPrev" onclick="navQ(-1)" disabled>←</button>
+          <button class="nav-btn" id="btnNext" onclick="navQ(1)">→</button>
+        </div>
+      </div>
+      <div class="q-tags" id="qTags"></div>
+      <div class="q-text" id="qText"></div>
+      <div class="opts" id="opts"></div>
+      <div class="q-foot">
+        <div class="q-hint" id="qHint">Escolha uma alternativa</div>
+        <button class="btn-verify" id="btnVerify" disabled onclick="verificar()">Verificar</button>
+      </div>
+      <div class="explain" id="explain"></div>
+    </div>
+    <div class="side-panel">
+      <div class="side-title">Progresso desta sessão</div>
+      <div class="progress-ring-wrap">
+        <svg width="70" height="70" viewBox="0 0 70 70">
+          <circle cx="35" cy="35" r="28" fill="none" stroke="#EBEBEA" stroke-width="5"/>
+          <circle id="ringCircle" cx="35" cy="35" r="28" fill="none" stroke="#B8922A" stroke-width="5"
+            stroke-dasharray="176" stroke-dashoffset="176" stroke-linecap="round"
+            transform="rotate(-90 35 35)" style="transition:stroke-dashoffset 0.6s ease"/>
+        </svg>
+        <div><div class="ring-main" id="ringPct">0%</div><div class="ring-sub" id="ringDesc">0 de 0 respondidas</div></div>
+      </div>
+      <div class="side-title">Navegação</div>
+      <div class="q-list" id="qDots"></div>
+      <div class="side-title">Por área</div>
+      <div id="areaBars"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// BANCO DE QUESTÕES
+// Para adicionar mais questões, copie um bloco e cole aqui!
+// ══════════════════════════════════════════
+const BANCO = [
+  { id:1, area:"Matematica", tema:"Álgebra", dificuldade:"facil", enunciado:"Se 3x + 7 = 22, qual é o valor de x?", alternativas:{A:"3",B:"5",C:"7",D:"9"}, resposta:"B", explicacao:"Subtraia 7: 3x = 15. Divida por 3: x = 5.<br><br><strong>Dica SAT:</strong> Isole a variável passo a passo — subtração primeiro, depois divisão." },
+  { id:2, area:"Matematica", tema:"Álgebra", dificuldade:"medio", enunciado:"Uma função é definida por f(x) = 2x² − 3x + 1. Qual é o valor de f(4)?", alternativas:{A:"21",B:"23",C:"25",D:"27"}, resposta:"A", explicacao:"f(4) = 2(16) − 3(4) + 1 = 32 − 12 + 1 = 21.<br><br><strong>Dica SAT:</strong> Siga a ordem das operações: expoentes antes de multiplicação." },
+  { id:3, area:"Matematica", tema:"Geometria", dificuldade:"medio", enunciado:"Um retângulo tem comprimento igual a 3× sua largura. Se o perímetro é 48, qual é a área?", alternativas:{A:"96",B:"108",C:"120",D:"144"}, resposta:"B", explicacao:"w = largura. 2(w + 3w) = 48 → w = 6. Área = 6 × 18 = 108.<br><br><strong>Dica SAT:</strong> Expresse tudo em termos de uma variável antes de resolver." },
+  { id:4, area:"Matematica", tema:"Análise de Dados", dificuldade:"facil", enunciado:"Turma de 30 alunos com média 72. Um aluno com nota 90 é adicionado. Qual a nova média?", alternativas:{A:"72",B:"73",C:"74",D:"75"}, resposta:"B", explicacao:"Soma = 2160 + 90 = 2250. 2250 ÷ 31 ≈ 72,6 ≈ 73.<br><br><strong>Dica SAT:</strong> Calcule a soma total — nunca faça média de médias." },
+  { id:5, area:"Matematica", tema:"Álgebra", dificuldade:"dificil", enunciado:"Qual é o valor de x na equação: (x + 3)/(x − 1) = 5?", alternativas:{A:"1",B:"2",C:"4",D:"8"}, resposta:"B", explicacao:"x + 3 = 5(x − 1) → x + 3 = 5x − 5 → x = 2. Verificação: (2+3)/(2-1) = 5 ✓<br><br><strong>Dica SAT:</strong> Sempre verifique se a solução anula o denominador." },
+  { id:6, area:"Matematica", tema:"Geometria", dificuldade:"dificil", enunciado:"Os pontos A(2,3) e B(8,11) estão no plano cartesiano. Qual é o ponto médio do segmento AB?", alternativas:{A:"(4, 6)",B:"(5, 7)",C:"(6, 8)",D:"(3, 5)"}, resposta:"B", explicacao:"((2+8)/2, (3+11)/2) = (5, 7).<br><br><strong>Dica SAT:</strong> Ponto médio = média das coordenadas x e média das y." },
+  { id:7, area:"Matematica", tema:"Álgebra", dificuldade:"medio", enunciado:"4 trabalhadores constroem uma parede em 6 dias. Quantos dias para 8 trabalhadores fazerem o mesmo?", alternativas:{A:"2 dias",B:"3 dias",C:"4 dias",D:"12 dias"}, resposta:"B", explicacao:"Total = 4×6 = 24 trabalhador-dias. Com 8: 24÷8 = 3 dias.<br><br><strong>Dica SAT:</strong> Calcule o trabalho total primeiro — mais pessoas = menos dias (proporção inversa)." },
+  { id:8, area:"Matematica", tema:"Geometria", dificuldade:"dificil", enunciado:"Um círculo tem equação (x − 3)² + (y + 2)² = 25. Qual é o raio?", alternativas:{A:"3",B:"4",C:"5",D:"25"}, resposta:"C", explicacao:"Forma padrão: r² = 25, então r = √25 = 5.<br><br><strong>Dica SAT:</strong> O erro clássico é marcar 25 — sempre tire a raiz quadrada." },
+  { id:9, area:"Leitura", tema:"Compreensão de Texto", dificuldade:"medio", enunciado:'Leia:\n\n"The scientist argued that the new findings did not contradict previous research, but rather complemented it by providing additional evidence for the existing theory."\n\nO cientista acredita que os novos resultados:', alternativas:{A:"Invalidam as pesquisas anteriores",B:"Contradizem a teoria existente",C:"Reforçam e complementam o que já se sabia",D:"São irrelevantes para o campo"}, resposta:"C", explicacao:"'Complemented' + 'additional evidence' = reforçam o conhecimento existente.<br><br><strong>Dica SAT:</strong> Localize a frase exata que responde à pergunta antes de escolher." },
+  { id:10, area:"Leitura", tema:"Vocabulário em Contexto", dificuldade:"medio", enunciado:'Leia:\n\n"The politician\'s speech was deliberately ambiguous, allowing different groups to interpret it in ways that suited their own beliefs."\n\nNo contexto, "ambiguous" significa:', alternativas:{A:"Claro e direto",B:"Passível de múltiplas interpretações",C:"Honesto e transparente",D:"Agressivo e provocador"}, resposta:"B", explicacao:"Grupos distintos interpretaram de formas diferentes — só possível com texto ambíguo.<br><br><strong>Dica SAT:</strong> O significado deve fazer sentido ao ser substituído na frase original." },
+  { id:11, area:"Leitura", tema:"Argumento e Evidência", dificuldade:"dificil", enunciado:'Argumento: "Estudantes com ≥8h de sono têm melhores notas. Logo, escolas devem começar mais tarde."\n\nQual opção ENFRAQUECE esse argumento?', alternativas:{A:"Estudantes com 8h relatam menos estresse",B:"Escolas que começam mais tarde têm as mesmas notas",C:"A maioria dos alunos dorme menos de 7h",D:"Testes são aplicados à tarde"}, resposta:"B", explicacao:"Se escolas que começam mais tarde têm as mesmas notas, o horário não melhora o desempenho.<br><br><strong>Dica SAT:</strong> Para enfraquecer, corte o elo entre a evidência e a conclusão." },
+  { id:12, area:"Leitura", tema:"Vocabulário em Contexto", dificuldade:"facil", enunciado:'Leia:\n\n"Despite the initial skepticism, the researcher\'s approach eventually garnered widespread acclaim."\n\n"Garnered" significa:', alternativas:{A:"Perdeu",B:"Conquistou",C:"Ignorou",D:"Questionou"}, resposta:"B", explicacao:"'Despite' indica contraste — apesar do ceticismo, a abordagem conquista reconhecimento.<br><br><strong>Dica SAT:</strong> Palavras de contraste (despite, however) indicam mudança de direção no sentido." },
+  { id:13, area:"Leitura", tema:"Compreensão de Texto", dificuldade:"medio", enunciado:'Leia:\n\n"The new policy was met with resistance from longtime employees, who feared that the changes would disrupt established workflows and undermine years of institutional knowledge."\n\nOs funcionários temem que a política:', alternativas:{A:"Aumente a produtividade",B:"Contrate novos funcionários",C:"Prejudique processos e conhecimentos já estabelecidos",D:"Reduza políticas internas"}, resposta:"C", explicacao:"'Disrupt workflows' + 'undermine institutional knowledge' = prejudicar processos e conhecimentos.<br><br><strong>Dica SAT:</strong> Preste atenção em palavras negativas: disrupt, undermine, challenge." },
+  { id:14, area:"Escrita", tema:"Gramática", dificuldade:"facil", enunciado:'Escolha a opção correta:\n\n"Neither the students nor the teacher _____ aware of the schedule change."', alternativas:{A:"were",B:"was",C:"are",D:"have been"}, resposta:"B", explicacao:"Com neither...nor, o verbo concorda com o sujeito mais próximo — 'teacher' (singular) → 'was'.<br><br><strong>Dica SAT:</strong> Neither/Nor: verbo sempre concorda com o sujeito depois do 'nor'." },
+  { id:15, area:"Escrita", tema:"Pontuação", dificuldade:"medio", enunciado:'Escolha a pontuação correta:\n\n"The report was thorough _____ it covered every aspect of the investigation."', alternativas:{A:"(vírgula apenas)",B:"(ponto e vírgula ;)",C:"(dois-pontos :)",D:"(travessão —)"}, resposta:"B", explicacao:"Duas orações independentes sem conjunção exigem ponto e vírgula. Vírgula sozinha = comma splice.<br><br><strong>Dica SAT:</strong> Duas frases completas sem conjunção → use (;) obrigatoriamente." },
+  { id:16, area:"Escrita", tema:"Concisão", dificuldade:"medio", enunciado:'Qual versão é mais concisa?\n\nA) "Due to the fact that it was raining, the game was cancelled."\nB) "Because it was raining, the game was cancelled."\nC) "In light of the rain that was occurring, game cancellation happened."\nD) "The game, which was cancelled, was cancelled because of rain."', alternativas:{A:"Versão A",B:"Versão B",C:"Versão C",D:"Versão D"}, resposta:"B", explicacao:"'Because' substitui 'due to the fact that' de forma direta e concisa.<br><br><strong>Dica SAT:</strong> Sempre prefira a versão mais curta que mantém o sentido completo." },
+  { id:17, area:"Escrita", tema:"Gramática", dificuldade:"dificil", enunciado:'Escolha a versão sem erro de modificador:\n\n"Running through the park, _____ was spotted by the dog."', alternativas:{A:"the squirrel running was spotted",B:"a squirrel was spotted by the dog",C:"the dog spotted a squirrel",D:"the park had a squirrel spotted"}, resposta:"B", explicacao:"O participio modifica o sujeito imediato — 'a squirrel' logo após a vírgula.<br><br><strong>Dica SAT:</strong> Dangling modifier: o sujeito da oração principal deve praticar a ação do participio." },
+  { id:18, area:"Escrita", tema:"Transição e Coesão", dificuldade:"medio", enunciado:'Escolha a conjunção correta:\n\n"The company increased its marketing budget; _____, sales continued to decline."', alternativas:{A:"therefore",B:"furthermore",C:"however",D:"similarly"}, resposta:"C", explicacao:"Há contradição entre aumento do orçamento e queda nas vendas — contraste exige 'however'.<br><br><strong>Dica SAT:</strong> Causa/efeito → therefore. Contraste → however. Adição → furthermore." },
+  { id:19, area:"Matematica", tema:"Análise de Dados", dificuldade:"dificil", enunciado:"Um conjunto tem mediana 15 e média 18. Se um valor muito alto for removido, o que é mais provável?", alternativas:{A:"A média aumenta e a mediana diminui",B:"A média diminui mais do que a mediana",C:"A mediana aumenta e a média fica igual",D:"Média e mediana aumentam na mesma proporção"}, resposta:"B", explicacao:"Média > mediana indica valor alto distorcendo a média. Removê-lo faz a média cair muito (sensível a outliers), a mediana muda pouco (robusta).<br><br><strong>Dica SAT:</strong> Mediana é robusta a outliers; média não é." },
+  { id:20, area:"Matematica", tema:"Álgebra", dificuldade:"facil", enunciado:"Se y = 3x − 4 e x = 5, qual é o valor de y?", alternativas:{A:"9",B:"10",C:"11",D:"12"}, resposta:"C", explicacao:"y = 3(5) − 4 = 15 − 4 = 11.<br><br><strong>Dica SAT:</strong> Substitua o valor direto e calcule passo a passo." }
+];
+
+// ══════════════════════════════════════════
+// NAVEGAÇÃO ENTRE PÁGINAS
+// ══════════════════════════════════════════
+function goTo(pageId, navEl, callback) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + pageId).classList.add('active');
+  if (navEl) navEl.classList.add('active');
+  if (callback) callback();
+  window.scrollTo(0, 0);
+  if (pageId === 'dashboard') atualizarDashboard();
+}
+
+// ══════════════════════════════════════════
+// LEADERBOARD
+// ══════════════════════════════════════════
+const lbData = {
+  semanal: [
+    { rank:1, name:'Mariana Costa',   city:'São Paulo, SP',        score:1480, change:'+60', dir:'up',   bg:'#EAF3DE', fg:'#2D6A4F' },
+    { rank:2, name:'Pedro Alves',     city:'Belo Horizonte, MG',   score:1460, change:'+45', dir:'up',   bg:'#E6F1FB', fg:'#185FA5' },
+    { rank:3, name:'Ana Ferreira',    city:'Curitiba, PR',          score:1440, change:'+30', dir:'up',   bg:'#FAEEDA', fg:'#854F0B' },
+    { rank:4, name:'Lucas Rocha',     city:'Florianópolis, SC',     score:1390, change:'+20', dir:'up',   bg:'#F5F5F3', fg:'#5C5C5A' },
+    { rank:5, name:'João Brasileiro', city:'Você',                  score:1280, change:'+18', dir:'up',   bg:'#B8922A', fg:'#fff', me:true },
+    { rank:6, name:'Camila Nunes',    city:'Rio de Janeiro, RJ',    score:1270, change:'—',   dir:'same', bg:'#F5F5F3', fg:'#5C5C5A' },
+    { rank:7, name:'Felipe Santos',   city:'Recife, PE',            score:1240, change:'-10', dir:'down', bg:'#F5F5F3', fg:'#5C5C5A' },
+  ],
+  mensal: [
+    { rank:1, name:'Ana Ferreira',    city:'Curitiba, PR',          score:1440, change:'+90', dir:'up',   bg:'#EAF3DE', fg:'#2D6A4F' },
+    { rank:2, name:'Mariana Costa',   city:'São Paulo, SP',         score:1430, change:'+80', dir:'up',   bg:'#E6F1FB', fg:'#185FA5' },
+    { rank:3, name:'Lucas Rocha',     city:'Florianópolis, SC',     score:1390, change:'+70', dir:'up',   bg:'#FAEEDA', fg:'#854F0B' },
+    { rank:4, name:'Pedro Alves',     city:'Belo Horizonte, MG',    score:1360, change:'+55', dir:'up',   bg:'#F5F5F3', fg:'#5C5C5A' },
+    { rank:5, name:'João Brasileiro', city:'Você',                  score:1280, change:'+35', dir:'up',   bg:'#B8922A', fg:'#fff', me:true },
+    { rank:6, name:'Felipe Santos',   city:'Recife, PE',            score:1240, change:'+20', dir:'up',   bg:'#F5F5F3', fg:'#5C5C5A' },
+    { rank:7, name:'Camila Nunes',    city:'Rio de Janeiro, RJ',    score:1220, change:'+15', dir:'up',   bg:'#F5F5F3', fg:'#5C5C5A' },
+  ],
+  geral: [
+    { rank:1, name:'Mariana Costa',   city:'São Paulo, SP',         score:1520, change:'+5',  dir:'up',   bg:'#EAF3DE', fg:'#2D6A4F' },
+    { rank:2, name:'Ana Ferreira',    city:'Curitiba, PR',          score:1500, change:'—',   dir:'same', bg:'#E6F1FB', fg:'#185FA5' },
+    { rank:3, name:'Lucas Rocha',     city:'Florianópolis, SC',     score:1490, change:'-1',  dir:'down', bg:'#FAEEDA', fg:'#854F0B' },
+    { rank:4, name:'Pedro Alves',     city:'Belo Horizonte, MG',    score:1460, change:'+2',  dir:'up',   bg:'#F5F5F3', fg:'#5C5C5A' },
+    { rank:5, name:'Camila Nunes',    city:'Rio de Janeiro, RJ',    score:1380, change:'+3',  dir:'up',   bg:'#F5F5F3', fg:'#5C5C5A' },
+    { rank:6, name:'Felipe Santos',   city:'Recife, PE',            score:1350, change:'-2',  dir:'down', bg:'#F5F5F3', fg:'#5C5C5A' },
+    { rank:7, name:'João Brasileiro', city:'Você',                  score:1280, change:'+8',  dir:'up',   bg:'#B8922A', fg:'#fff', me:true },
+  ]
+};
+const medals = ['🥇','🥈','🥉'];
+const rankCls = ['top1','top2','top3'];
+
+function renderLb(key) {
+  document.getElementById('lbList').innerHTML = lbData[key].map(p => `
+    <div class="lb-row${p.me?' me':''}">
+      <div class="lb-rank ${rankCls[p.rank-1]||''}">${p.rank<=3?medals[p.rank-1]:p.rank}</div>
+      <div class="lb-avatar" style="background:${p.bg};color:${p.fg};">${p.name.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+      <div class="lb-info"><div class="lb-name">${p.name}${p.me?' (você)':''}</div><div class="lb-city">${p.city}</div></div>
+      <div class="lb-score-wrap">
+        <div class="lb-score${p.rank===1?' gold':''}">${p.score.toLocaleString('pt-BR')}</div>
+        <div class="lb-change ${p.dir}">${p.dir==='up'?'▲':p.dir==='down'?'▼':'·'} ${p.change}</div>
+      </div>
+    </div>`).join('');
+}
+function setTab(btn, key) {
+  document.querySelectorAll('.lb-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active'); renderLb(key);
+}
+renderLb('semanal');
+
+// ══════════════════════════════════════════
+// SISTEMA DE QUESTÕES
+// ══════════════════════════════════════════
+let questoesFiltradas = [...BANCO];
+let indiceAtual = 0;
+let respostas = {};
+
+function filtrar(btn, filtro) {
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  questoesFiltradas = filtro==='todas' ? [...BANCO] : BANCO.filter(q=>q.area===filtro||q.dificuldade===filtro);
+  indiceAtual = 0;
+  renderQ(); renderDots(); renderAreaBars();
+}
+
+function filtrarArea(area) {
+  return function() {
+    questoesFiltradas = BANCO.filter(q => q.area === area);
+    document.querySelectorAll('.filter-btn').forEach(b => {
+      b.classList.toggle('active', b.textContent.trim() === {Matematica:'Matemática',Leitura:'Leitura',Escrita:'Escrita'}[area]);
+    });
+    indiceAtual = 0;
+    renderQ(); renderDots(); renderAreaBars();
+  };
+}
+
+function renderQ() {
+  const q = questoesFiltradas[indiceAtual];
+  if (!q) return;
+  const areaClass = {Matematica:'area-mat',Leitura:'area-leit',Escrita:'area-escr'};
+  const difClass = {facil:'dif-facil',medio:'dif-medio',dificil:'dif-dificil'};
+  const difLabel = {facil:'Fácil',medio:'Médio',dificil:'Difícil'};
+  document.getElementById('qTags').innerHTML =
+    `<span class="tag ${areaClass[q.area]||''}">${q.area}</span>
+     <span class="tag" style="background:var(--gray-50);color:var(--gray-600);">${q.tema}</span>
+     <span class="tag ${difClass[q.dificuldade]||''}">${difLabel[q.dificuldade]||q.dificuldade}</span>`;
+  document.getElementById('qCounter').textContent = `Questão ${indiceAtual+1} de ${questoesFiltradas.length}`;
+  document.getElementById('qText').textContent = q.enunciado;
+  document.getElementById('explain').classList.remove('show');
+  document.getElementById('explain').innerHTML = '';
+  const prev = respostas[q.id];
+  document.getElementById('opts').innerHTML = Object.entries(q.alternativas).map(([l,t]) => {
+    let cls = '';
+    if (prev) { if (l===q.resposta) cls='correct'; else if (l===prev.escolha&&prev.escolha!==q.resposta) cls='wrong'; }
+    return `<button class="opt ${cls}" onclick="escolher(this,'${l}')" ${prev?'disabled':''}><span class="opt-letter">${l}</span><span>${t}</span></button>`;
+  }).join('');
+  const hint = document.getElementById('qHint');
+  if (prev) {
+    hint.textContent = prev.escolha===q.resposta ? '✓ Correto!' : '✗ Incorreto';
+    hint.className = 'q-hint '+(prev.escolha===q.resposta?'correct':'wrong');
+    document.getElementById('explain').innerHTML = q.explicacao;
+    document.getElementById('explain').classList.add('show');
+    const b = document.getElementById('btnVerify');
+    b.textContent = indiceAtual<questoesFiltradas.length-1 ? 'Próxima →' : 'Finalizar';
+    b.disabled = false; b.onclick = ()=>navQ(1);
+  } else {
+    hint.textContent = 'Escolha uma alternativa'; hint.className = 'q-hint';
+    const b = document.getElementById('btnVerify');
+    b.textContent = 'Verificar'; b.disabled = true; b.onclick = verificar;
+  }
+  document.getElementById('btnPrev').disabled = indiceAtual===0;
+  document.getElementById('btnNext').disabled = indiceAtual===questoesFiltradas.length-1;
+  renderDots(); atualizarStats(); atualizarRing();
+}
+
+function escolher(btn, letra) {
+  document.querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+  btn.classList.add('selected'); btn._letra = letra;
+  document.getElementById('btnVerify').disabled = false;
+}
+
+function verificar() {
+  const sel = document.querySelector('.opt.selected');
+  if (!sel) return;
+  const q = questoesFiltradas[indiceAtual];
+  const escolha = sel._letra;
+  respostas[q.id] = { escolha, correta: escolha===q.resposta };
+  document.querySelectorAll('.opt').forEach(btn => {
+    const l = btn.querySelector('.opt-letter').textContent;
+    btn.classList.remove('selected');
+    if (l===q.resposta) btn.classList.add('correct');
+    else if (l===escolha) btn.classList.add('wrong');
+    btn.disabled = true;
+  });
+  document.getElementById('explain').innerHTML = q.explicacao;
+  document.getElementById('explain').classList.add('show');
+  const hint = document.getElementById('qHint');
+  hint.textContent = escolha===q.resposta ? '✓ Correto!' : '✗ Incorreto — veja a explicação';
+  hint.className = 'q-hint '+(escolha===q.resposta?'correct':'wrong');
+  const b = document.getElementById('btnVerify');
+  b.textContent = indiceAtual<questoesFiltradas.length-1 ? 'Próxima →' : 'Finalizar';
+  b.onclick = ()=>navQ(1);
+  renderDots(); atualizarStats(); atualizarRing();
+  atualizarDashboard();
+}
+
+function navQ(dir) {
+  const n = indiceAtual+dir;
+  if (n>=0&&n<questoesFiltradas.length) { indiceAtual=n; renderQ(); window.scrollTo(0,0); }
+}
+
+function renderDots() {
+  document.getElementById('qDots').innerHTML = questoesFiltradas.map((q,i) => {
+    const r = respostas[q.id];
+    let cls = i===indiceAtual ? 'current' : '';
+    if (r) cls = (r.correta?'acerto':'erro') + (i===indiceAtual?' current':'');
+    return `<div class="q-dot ${cls}" onclick="irPara(${i})">${i+1}</div>`;
+  }).join('');
+}
+function irPara(i) { indiceAtual=i; renderQ(); }
+
+function atualizarStats() {
+  const vals = Object.values(respostas);
+  const ac = vals.filter(r=>r.correta).length;
+  const er = vals.filter(r=>!r.correta).length;
+  document.getElementById('st-acertos').textContent = ac;
+  document.getElementById('st-erros').textContent = er;
+  document.getElementById('st-pct').textContent = vals.length>0 ? Math.round(ac/vals.length*100)+'%' : '—';
+}
+
+function atualizarRing() {
+  const total = questoesFiltradas.length;
+  const resp = questoesFiltradas.filter(q=>respostas[q.id]).length;
+  const pct = total>0 ? resp/total : 0;
+  document.getElementById('ringCircle').style.strokeDashoffset = 176*(1-pct);
+  document.getElementById('ringPct').textContent = Math.round(pct*100)+'%';
+  document.getElementById('ringDesc').textContent = `${resp} de ${total} respondidas`;
+}
+
+function renderAreaBars() {
+  const areas = ['Matematica','Leitura','Escrita'];
+  const labels = {Matematica:'Matemática',Leitura:'Leitura',Escrita:'Escrita'};
+  document.getElementById('areaBars').innerHTML = areas.map(area => {
+    const qs = questoesFiltradas.filter(q=>q.area===area);
+    if (!qs.length) return '';
+    const resp = qs.filter(q=>respostas[q.id]);
+    const ac = resp.filter(q=>respostas[q.id]?.correta);
+    const pct = resp.length>0 ? Math.round(ac.length/resp.length*100) : 0;
+    return `<div class="area-row"><div class="area-top"><span class="area-name">${labels[area]}</span><span class="area-pct">${resp.length>0?pct+'%':'—'}</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div></div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+// ATUALIZAR DASHBOARD COM DADOS REAIS
+// ══════════════════════════════════════════
+function atualizarDashboard() {
+  const vals = Object.values(respostas);
+  const ac = vals.filter(r=>r.correta).length;
+  const total = vals.length;
+  if (total > 0) {
+    document.getElementById('db-taxa').textContent = Math.round(ac/total*100)+'%';
+    document.getElementById('db-respondidas').textContent = 248 + total;
+  }
+  const areas = [
+    {id:'db-alg',bar:'bar-alg',tema:'Álgebra'},
+    {id:'db-dados',bar:'bar-dados',tema:'Análise de Dados'},
+    {id:'db-leit',bar:'bar-leit',area:'Leitura'},
+    {id:'db-geo',bar:'bar-geo',tema:'Geometria'},
+    {id:'db-escr',bar:'bar-escr',area:'Escrita'}
+  ];
+  areas.forEach(({id,bar,tema,area}) => {
+    const qs = BANCO.filter(q => tema ? q.tema===tema : q.area===area);
+    const resp = qs.filter(q=>respostas[q.id]);
+    if (resp.length>0) {
+      const pct = Math.round(resp.filter(q=>respostas[q.id]?.correta).length/resp.length*100);
+      document.getElementById(id).textContent = pct+'%';
+      document.getElementById(bar).style.width = pct+'%';
+    }
+  });
+}
+
+// INIT
+renderQ(); renderDots(); renderAreaBars();
+</script>
+</body>
+</html>
